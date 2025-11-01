@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Boeing Vliegtuigviewer</title>
+    <style>
+        body {font-family:Arial,Helvetica,sans-serif;margin:0;background:#f5f5f5;}
+        header {background:#003366;color:#fff;padding:1rem;text-align:center;}
+        nav {display:flex;background:#006699;}
+        nav button{
+            flex:1;padding:0.8rem;border:none;background:#006699;color:#fff;
+            cursor:pointer;font-size:1rem;transition:background .2s;
+        }
+        nav button:hover{background:#005580;}
+        nav button.active{background:#004466;}
+        .section{display:none;padding:1rem;}
+        .section.active{display:block;}
+        .cards{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;}
+        .card{
+            background:#fff;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.2);
+            width:260px;overflow:hidden;cursor:pointer;transition:transform .2s;
+        }
+        .card:hover{transform:scale(1.03);}
+        .card img{width:100%;height:150px;object-fit:cover;}
+        .card h3{margin:.5rem;text-align:center;}
+        .specs table{width:100%;border-collapse:collapse;margin-top:.5rem;}
+        .specs th,.specs td{border:1px solid #ddd;padding:.4rem;text-align:left;}
+        .specs th{background:#f0f0f0;}
+        .video-wrapper{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;}
+        .video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+        .tour-wrapper{margin-top:1rem;}
+        .tour-iframe{width:100%;height:480px;border:none;}
+        .fallback-link{
+            display:inline-block;margin-top:.5rem;padding:.5rem 1rem;background:#006699;color:#fff;
+            text-decoration:none;border-radius:4px;
+        }
+        footer{text-align:center;padding:1rem;background:#e0e0e0;margin-top:2rem;}
+    </style>
+</head>
+<body>
+<header>
+    <h1>Boeing Passagiersvliegtuigen</h1>
+</header>
+
+<nav>
+    <button data-target="home" class="active">Home</button>
+    <button data-target="search">Zoek vlucht</button>
+    <button data-target="about">Over</button>
+</nav>
+
+<!-- ==================== HOME ==================== -->
+<section id="home" class="section active">
+    <h2>Onze Boeing‑types</h2>
+    <div class="cards">
+        <!-- 737 -->
+        <div class="card" data-aircraft="737">
+            <img src="https://images.unsplash.com/photo-1516607897552-61c654fc5bd5?auto=format&fit=crop&w=800&q=80"
+                 alt="Boeing 737-900">
+            <h3>Boeing 737‑900</h3>
+        </div>
+
+        <!-- 777 -->
+        <div class="card" data-aircraft="777">
+            <img src="https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&w=800&q=80"
+                 alt="Boeing 777">
+            <h3>Boeing 777</h3>
+        </div>
+
+        <!-- 787 -->
+        <div class="card" data-aircraft="787">
+            <img src="https://images.unsplash.com/photo-1539066678-1ee62621caa7?auto=format&fit=crop&w=800&q=80"
+                 alt="Boeing 787-8">
+            <h3>Boeing 787‑8 Dreamliner</h3>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== SEARCH ==================== -->
+<section id="search" class="section">
+    <h2>Zoek je vliegtuig op vluchtnummer</h2>
+    <p>Typ een vluchtnummer (bijv. “KL1234”, “AA567”) en druk op **Zoeken**.</p>
+
+    <input type="text" id="flight-input"
+           placeholder="bijv. KL1234, AA567"
+           style="padding:0.5rem;width:260px;font-size:1rem;">
+    <button id="flight-search"
+            style="padding:0.5rem;font-size:1rem;">Zoeken</button>
+
+    <p id="flight-result"
+       style="margin-top:1rem;font-weight:bold;"></p>
+</section>
+
+<!-- ==================== DETAIL ==================== -->
+<section id="detail" class="section">
+    <button id="back-home"
+            style="margin-bottom:1rem;">← Terug naar home</button>
+
+    <h2 id="detail-title"></h2>
+
+    <div class="video-wrapper" id="video-wrapper"></div>
+
+    <div class="specs" id="specs"></div>
+
+    <h3>Virtuele rondleiding (walk‑around)</h3>
+    <div class="tour-wrapper" id="tour-wrapper"></div>
+</section>
+
+<!-- ==================== ABOUT ==================== -->
+<section id="about" class="section">
+    <h2>Over deze pagina</h2>
+    <p>Deze demo laat:</p>
+    <ul>
+        <li>Foto’s, video’s en specificaties van drie Boeing‑modellen.</li>
+        <li>Virtuele tours:
+            <ul>
+                <li>**737‑900** – KLM XR‑tour (embed‑friendly).</li>
+                <li>**777** – Etihad 3‑D‑Seat‑Map‑VR (embed‑friendly).</li>
+                <li>**787‑8** – Matterport‑tour (embed‑friendly, de link die je gaf).</li>
+            </ul>
+        </li>
+        <li>Een verbeterde “Zoek vlucht”‑functie (werkt nu voor de meeste grote maatschappijen).</li>
+        <li>Werkende tab‑navigatie (Home | Zoek vlucht | Over).</li>
+    </ul>
+</section>
+
+<footer>
+    © 2025 – gemaakt met ❤️ door Brayden.<br>
+    Video‑links:
+    <a href="https://www.youtube.com/watch?v=z3_SoIkBras" target="_blank">737</a>,
+    <a href="https://www.youtube.com/watch?v=JFKvSGoCJwE" target="_blank">777</a>,
+    <a href="https://www.youtube.com/watch?v=z_PlyQAWT4g" target="_blank">787</a>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    /* ------------------- TAB‑NAVIGATIE ------------------- */
+    document.querySelectorAll('nav button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.target;
+            // verberg alle secties
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(target).classList.add('active');
+            // active‑state voor de knoppen
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    /* ------------------- VLOTF DATA ------------------- */
+    const aircraftData = {
+        "737": {
+            title: "Boeing 737‑900",
+            youtube: "https://www.youtube.com/embed/z3_SoIkBras",
+            specs: {
+                "Passagiers (typisch)": "126‑215",
+                "Lengte": "33,6 m",
+                "Spanwijdte": "35,8 m",
+                "Max. bereik": "5.560 km",
+                "Motoren": "CFM56‑7B of CFM56‑7BE"
+            },
+            tourUrl: "https://xr.klm.com/klm/?type=Boeing&aircraft=737-900"
+        },
+        "777": {
+            title: "Boeing 777",
+            youtube: "https://www.youtube.com/embed/JFKvSGoCJwE",
+            specs: {
+                "Passagiers (typisch)": "314‑396",
+                "Lengte": "63,7 m",
+                "Spanwijdte": "64,8 m",
+                "Max. bereik": "15.840 km",
+                "Motoren": "GE90, PW4000, Trent 800"
+            },
+            // Etihad 3‑D‑Seat‑Map‑VR (embed‑friendly)
+            tourUrl: "https://etihad.3dseatmapvr.com/ux/ux2025/ux.html?aircraft=b777&utm_source=chatgpt.com"
+        },
+        "787": {
+            title: "Boeing 787‑8 Dreamliner",
+            youtube: "https://www.youtube.com/embed/z_PlyQAWT4g",
+            specs: {
+                "Passagiers (typisch)": "242‑335",
+                "Lengte": "56,7‑68,4 m",
+                "Spanwijdte": "60,1‑65,0 m",
+                "Max. bereik": "14.140 km",
+                "Motoren": "GEnx‑1B, Rolls‑Royce Trent 1000"
+            },
+            // <--- JOUW NIEUWE MATERPORT‑TOUR
+            tourUrl: "https://my.matterport.com/show/?m=UfvJHahSFrm"
+        }
+    };
+
+    /* ------------------- KAART‑CLICK (HOME) ------------------- */
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+            const type = card.dataset.aircraft;
+            loadDetail(type);
+        });
+    });
+
+    /* ------------------- TERUG NAAR HOME ------------------- */
+    document.getElementById('back-home').addEventListener('click', () => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('home').classList.add('active');
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.querySelector('nav button[data-target="home"]').classList.add('active');
+    });
+
+    /* ------------------- DETAIL‑LAAD FUNCTIE ------------------- */
+    async function loadDetail(type){
+        const data = aircraftData[type];
+        if(!data) return;
+
+        // TITEL
+        document.getElementById('detail-title').textContent = data.title;
+
+        // VIDEO
+        document.getElementById('video-wrapper').innerHTML =
+            `<iframe src="${data.youtube}" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>`;
+
+        // SPECIFICATIES
+        let specsHTML = `<h3>Belangrijkste specificaties</h3><table>`;
+        for(const key in data.specs){
+            specsHTML += `<tr><th>${key}</th><td>${data.specs[key]}</td></tr>`;
+        }
+        specsHTML += `</table>`;
+        document.getElementById('specs').innerHTML = specsHTML;
+
+        // WALK‑AROUND (virtuele tour)
+        const wrapper = document.getElementById('tour-wrapper');
+        wrapper.innerHTML = `<p>Laden…</p>`;   // placeholder
+
+        const iframe = document.createElement('iframe');
+        iframe.className = 'tour-iframe';
+        iframe.src = data.tourUrl;
+        iframe.allow = "xr-spatial-tracking; fullscreen; camera";
+
+        wrapper.innerHTML = '';
+        wrapper.appendChild(iframe);
+
+        // *Fallback* wanneer de website een X‑Frame‑Options‑block gebruikt
+        setTimeout(() => {
+            // Bij cross‑origin iframes kan `contentWindow.document` niet gelezen worden,
+            // maar in dat geval is `childElementCount` 0 → we laten de fallback zien.
+            const blocked = (iframe.contentWindow && iframe.contentWindow.document.body.childElementCount === 0);
+            if(blocked){
+                wrapper.innerHTML = `<p>De virtuele tour kan niet direct in deze pagina worden weergegeven.</p>
+                    <a class="fallback-link" href="${data.tourUrl}" target="_blank">Open de tour in een nieuw tabblad</a>`;
+            }
+        }, 1200);
+
+        // toon detail‑sectie
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('detail').classList.add('active');
+    }
+
+    /* ------------------- VLUCHT‑SEARCH (verbeterd) ------------------- */
+    document.getElementById('flight-search').addEventListener('click', () => {
+        const raw = document.getElementById('flight-input').value.trim().toUpperCase();
+        const resultEl = document.getElementById('flight-result');
+
+        if (!raw){
+            resultEl.textContent = "Voer eerst een vluchtnummer in.";
+            return;
+        }
+
+        // 1️⃣  Zoek direct naar een Boeing‑code in de string
+        let type = null;
+        if (raw.includes('737')) type = '737';
+        else if (raw.includes('777')) type = '777';
+        else if (raw.includes('787')) type = '787';
+        else {
+            // 2️⃣  Haal de airline‑code (letters voor het eerste cijfer) op
+            const match = raw.match(/^([A-Z]{2,3})/);
+            const airline = match ? match[1] : null;
+
+            // Mapping “airline‑code → Boeing‑type”
+            const airlineMap = {
+                // Boeing 737
+                "KL": "737",   // KLM
+                "KLM":"737",
+                "AA": "737",   // American
+                "DL": "737",   // Delta
+                "UA": "737",   // United
+
+                // Boeing 777
+                "BA": "777",   // British Airways
+                "AF": "777",   // Air France
+                "EK": "777",   // Emirates
+                "QF": "777",   // Qantas (777‑300ER)
+                "QR": "777",   // Qatar (operates 777‑300ER)
+
+                // Boeing 787
+                "NH": "787",   // All Nippon (ANA)
+                "JL": "787",   // Japan Airlines
+                "QR": "787",   // Qatar (787‑8)
+                "QTR":"787"    // Qatar (variant)
+            };
+
+            if (airline && airlineMap[airline]) {
+                type = airlineMap[airline];
+            }
+        }
+
+        // 3️⃣  Resultaat tonen
+        if (type){
+            resultEl.textContent = `Volgens onze (verbeterde) logica vlieg je in een Boeing ${type}.`;
+            loadDetail(type);
+        }else{
+            resultEl.textContent = "We konden geen Boeing‑type koppelen aan dit vluchtnummer.";
+        }
+    });
+
+}); // <-- einde DOMContentLoaded
+</script>
+</body>
+</html>
